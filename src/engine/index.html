@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+  
+  <script type="module">
+    import { executeModules } from './module-executor.js';
+    
+    // Create Shadow DOM loading overlay
+    let loadingShadowHost;
+    let loadingShadow;
+    
+    function createLoadingOverlay() {
+      // Create shadow host element
+      loadingShadowHost = document.createElement('div');
+      loadingShadow = loadingShadowHost.attachShadow({ mode: 'closed' });
+      
+      // Add styles and content to shadow DOM
+      loadingShadow.innerHTML = `
+        <style>
+          :host {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 999999;
+          }
+          
+          .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(30, 30, 30, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          }
+          
+          .loading-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            color: #d4d4d4;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          }
+          
+          .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #374151;
+            border-top: 3px solid #60a5fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+          
+          .loading-text {
+            font-size: 14px;
+            font-weight: 500;
+          }
+          
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        </style>
+        
+        <div class="loading-overlay">
+          <div class="loading-content">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading preview...</div>
+          </div>
+        </div>
+      `;
+      
+      document.body.appendChild(loadingShadowHost);
+    }
+    
+    function showLoading() {
+      if (!loadingShadowHost) {
+        createLoadingOverlay();
+      }
+      loadingShadowHost.style.display = 'block';
+    }
+    
+    function hideLoading() {
+      if (loadingShadowHost) {
+        loadingShadowHost.style.display = 'none';
+      }
+    }
+    
+    // Show loading initially
+    showLoading();
+    
+    // Execute modules with the provided data
+    window.addEventListener('message', function(event) {
+      if (event.data.type === 'EXECUTE_MODULES') {
+        // Show loading briefly during execution
+        showLoading();
+        
+        // Small delay to show loading, then execute
+        setTimeout(() => {
+          executeModules(event.data.modules);
+          hideLoading();
+        }, 50);
+      }
+    });
+    
+    // Signal that we're ready to receive modules and hide initial loading
+    hideLoading();
+    window.parent.postMessage({ type: 'READY' }, '*');
+  </script>
+</body>
+</html>

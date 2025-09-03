@@ -1,253 +1,307 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import './App.css'
+import PreviewEngine from './components/PreviewEngine'
+
+interface FileData {
+  name: string;
+  content: string;
+}
 
 const App: React.FC = () => {
-  const [tsCode, setTsCode] = useState(`// Enter your TypeScript code here
-interface User {
-  name: string;
-  age: number;
+  const [files, setFiles] = useState<FileData[]>([
+    {
+      name: 'index.js',
+      content: `import { createUserCard, createCounter } from './ui.js';
+
+// Create main container
+const app = document.createElement('div');
+app.style.cssText = \`
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+\`;
+
+// Add title
+const title = document.createElement('h1');
+title.textContent = 'JavaScript UI Demo';
+title.style.cssText = \`
+  color: #2563eb;
+  text-align: center;
+  margin-bottom: 30px;
+\`;
+app.appendChild(title);
+
+// Create user cards
+const users = [
+  { name: 'Alice', age: 28, role: 'Designer' },
+  { name: 'Bob', age: 32, role: 'Developer' },
+  { name: 'Carol', age: 25, role: 'Manager' }
+];
+
+users.forEach(user => {
+  const card = createUserCard(user);
+  app.appendChild(card);
+});
+
+// Add counter component
+const counter = createCounter();
+app.appendChild(counter);
+
+// Add to page
+document.body.appendChild(app);`
+    },
+    {
+      name: 'ui.js',
+      content: `export function createUserCard(user) {
+  const card = document.createElement('div');
+  card.style.cssText = \`
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(0);
+    transition: transform 0.2s ease;
+  \`;
+  
+  card.innerHTML = \`
+    <h3 style="margin: 0 0 10px 0; font-size: 1.4em;">\${user.name}</h3>
+    <p style="margin: 5px 0; opacity: 0.9;">Age: \${user.age}</p>
+    <p style="margin: 5px 0; opacity: 0.9;">Role: \${user.role}</p>
+  \`;
+  
+  // Add hover effect
+  card.addEventListener('mouseenter', () => {
+    card.style.transform = 'translateY(-5px)';
+    card.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2)';
+  });
+  
+  card.addEventListener('mouseleave', () => {
+    card.style.transform = 'translateY(0)';
+    card.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+  });
+  
+  return card;
 }
 
-const user: User = {
-  name: "Alice",
-  age: 30
-};
-
-function greet(user: User): string {
-  return \`Hello, \${user.name}! You are \${user.age} years old.\`;
-}
-
-console.log(greet(user));`)
-
-  const [jsCode, setJsCode] = useState('')
+export function createCounter() {
+  const container = document.createElement('div');
+  container.style.cssText = \`
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    margin-top: 30px;
+  \`;
+  
+  const title = document.createElement('h3');
+  title.textContent = 'Interactive Counter';
+  title.style.cssText = \`
+    margin: 0 0 15px 0;
+    color: #1e293b;
+  \`;
+  
+  const display = document.createElement('div');
+  display.textContent = '0';
+  display.style.cssText = \`
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #3b82f6;
+    margin: 15px 0;
+  \`;
+  
+  const buttonContainer = document.createElement('div');
+  buttonContainer.style.cssText = \`
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 15px;
+  \`;
+  
+  let count = 0;
+  
+  const createButton = (text, color, onClick) => {
+    const button = document.createElement('button');
+    button.textContent = text;
+    button.style.cssText = \`
+      background: \${color};
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1em;
+      transition: transform 0.1s ease;
+    \`;
+    
+    button.addEventListener('click', onClick);
+    button.addEventListener('mousedown', () => {
+      button.style.transform = 'scale(0.95)';
+    });
+    button.addEventListener('mouseup', () => {
+      button.style.transform = 'scale(1)';
+    });
+    
+    return button;
+  };
+  
+  const incrementBtn = createButton('+1', '#10b981', () => {
+    count++;
+    display.textContent = count;
+  });
+  
+  const decrementBtn = createButton('-1', '#ef4444', () => {
+    count--;
+    display.textContent = count;
+  });
+  
+  const resetBtn = createButton('Reset', '#6b7280', () => {
+    count = 0;
+    display.textContent = count;
+  });
+  
+  buttonContainer.appendChild(decrementBtn);
+  buttonContainer.appendChild(resetBtn);
+  buttonContainer.appendChild(incrementBtn);
+  
+  container.appendChild(title);
+  container.appendChild(display);
+  container.appendChild(buttonContainer);
+  
+  return container;
+}`
+    }
+  ]);
+  const [activeFileIndex, setActiveFileIndex] = useState(0);
+  const [compiledModules, setCompiledModules] = useState<Record<string, string> | null>(null)
   const [error, setError] = useState('')
-  const [isCompiling, setIsCompiling] = useState(false)
-  const [previewOutput, setPreviewOutput] = useState('')
-  const [autoRun, setAutoRun] = useState(true)
-  const workerRef = useRef<Worker | null>(null)
-  const requestIdRef = useRef(0)
-  const iframeRef = useRef<HTMLIFrameElement | null>(null)
 
   useEffect(() => {
-    // Initialize the Web Worker
-    workerRef.current = new Worker(new URL('./ts-worker.ts', import.meta.url), {
-      type: 'module'
-    })
-    
-    workerRef.current.onmessage = (e) => {
-      const { id, success, result, error: workerError } = e.data
-      
-      if (success) {
-        setJsCode(result)
-        setError('')
-        if (autoRun) {
-          executeCode(result)
-        }
-      } else {
-        setError(workerError || 'Compilation failed')
-        setJsCode('')
-        setPreviewOutput('')
-      }
-      setIsCompiling(false)
-    }
-
-    workerRef.current.onerror = (err) => {
-      setError('Worker error: ' + err.message)
-      setIsCompiling(false)
-    }
-
-    // Compile initial code
-    compileToJS(tsCode)
-
-    // Cleanup worker on unmount
-    return () => {
-      if (workerRef.current) {
-        workerRef.current.terminate()
-      }
-    }
+    // Process initial files
+    processFiles(files)
   }, [])
 
-  const compileToJS = (typescript: string) => {
-    if (!workerRef.current) return
+  const processFiles = (files: FileData[]) => {
+    // Use JavaScript files directly
+    const modules: Record<string, string> = {};
+    files.forEach(file => {
+      modules[file.name] = file.content;
+    });
     
-    setIsCompiling(true)
-    const id = ++requestIdRef.current
-    
-    workerRef.current.postMessage({
-      id,
-      code: typescript,
-      options: {
-        target: 'ES2020',
-        module: 'ES2020',
-        strict: true
-      }
-    })
+    setCompiledModules(modules);
+    setError('');
   }
 
   const handleInputChange = (value: string) => {
-    setTsCode(value)
-    compileToJS(value)
+    const updatedFiles = files.map((file, index) => 
+      index === activeFileIndex ? { ...file, content: value } : file
+    );
+    setFiles(updatedFiles);
+    processFiles(updatedFiles);
   }
 
-  const executeCode = (code: string) => {
-    if (!iframeRef.current || !code.trim()) {
-      setPreviewOutput('')
-      return
-    }
-
-    const htmlContent = `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <style>
-          body { 
-            margin: 0; 
-            padding: 8px; 
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace; 
-            font-size: 12px;
-            background: #1e1e1e;
-            color: #d4d4d4;
-          }
-        </style>
-      </head>
-      <body>
-        <div id="output"></div>
-        <script>
-          const output = document.getElementById('output');
-          
-          // Capture console methods
-          const originalConsole = {
-            log: console.log,
-            error: console.error,
-            warn: console.warn,
-            info: console.info
-          };
-          
-          function addOutput(type, ...args) {
-            const div = document.createElement('div');
-            div.className = 'console-' + type;
-            div.textContent = args.map(arg => 
-              typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
-            ).join(' ');
-            output.appendChild(div);
-          }
-          
-          console.log = (...args) => {
-            originalConsole.log(...args);
-            addOutput('log', ...args);
-          };
-          
-          console.error = (...args) => {
-            originalConsole.error(...args);
-            addOutput('error', ...args);
-          };
-          
-          console.warn = (...args) => {
-            originalConsole.warn(...args);
-            addOutput('warn', ...args);
-          };
-          
-          console.info = (...args) => {
-            originalConsole.info(...args);
-            addOutput('info', ...args);
-          };
-          
-          // Execute the code with error handling
-          try {
-            // Create a blob URL for the ES module
-            const moduleCode = \`${code.replace(/`/g, '\\`')}\`;
-            const blob = new Blob([moduleCode], { type: 'application/javascript' });
-            const url = URL.createObjectURL(blob);
-            
-            // Import and execute the module
-            import(url).then(module => {
-              // If the module has a default export, show it
-              if (module.default !== undefined) {
-                addOutput('log', '← ' + (typeof module.default === 'object' ? JSON.stringify(module.default, null, 2) : String(module.default)));
-              }
-              URL.revokeObjectURL(url);
-            }).catch(error => {
-              addOutput('error', 'Module Error: ' + error.message);
-              URL.revokeObjectURL(url);
-            });
-          } catch (error) {
-            addOutput('error', 'Error: ' + error.message);
-          }
-        </script>
-      </body>
-      </html>
-    `;
-
-    iframeRef.current.srcdoc = htmlContent;
-  }
-
-  const clearPreview = () => {
-    setPreviewOutput('')
-    if (iframeRef.current) {
-      iframeRef.current.srcdoc = '';
+  const addFile = () => {
+    const fileName = prompt('Enter file name (e.g., foo.ts):');
+    if (fileName && !files.find(f => f.name === fileName)) {
+      const newFiles = [...files, { name: fileName, content: '// New file\n' }];
+      setFiles(newFiles);
+      setActiveFileIndex(newFiles.length - 1);
     }
   }
 
-  const runCode = () => {
-    if (jsCode) {
-      executeCode(jsCode)
+  const removeFile = (index: number) => {
+    if (files.length === 1) return; // Keep at least one file
+    const newFiles = files.filter((_, i) => i !== index);
+    setFiles(newFiles);
+    if (activeFileIndex >= newFiles.length) {
+      setActiveFileIndex(newFiles.length - 1);
     }
   }
+
 
   return (
     <div className="app">
       <header className="header">
-        <h1>TypeScript Playground</h1>
-        <p>Write TypeScript code, see the compiled JavaScript, and preview the execution results</p>
+        <h1>JavaScript Playground</h1>
+        <p>Write JavaScript code with ES modules and see the execution results</p>
       </header>
       
       <main className="main">
         <div className="editor-container">
-          <div className="input-section">
-            <h2>TypeScript Input</h2>
-            <textarea
-              value={tsCode}
-              onChange={(e) => handleInputChange(e.target.value)}
-              placeholder="Enter your TypeScript code here..."
-              className="code-editor"
-            />
-          </div>
-          
-          <div className="output-section">
-            <h2>
-              JavaScript Output 
-              {isCompiling && <span className="compiling-indicator">● Compiling...</span>}
-            </h2>
-            {error ? (
-              <div className="error">
-                <strong>Error:</strong> {error}
+          <div className="code-workspace">
+            <div className="workspace-header">
+              <div className="file-tabs">
+                {files.map((file, index) => (
+                  <div 
+                    key={index} 
+                    className={`file-tab ${index === activeFileIndex ? 'active' : ''}`}
+                    onClick={() => setActiveFileIndex(index)}
+                  >
+                    <span className="tab-icon">📄</span>
+                    <span className="tab-name">{file.name}</span>
+                    {files.length > 1 && (
+                      <button 
+                        className="tab-close"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeFile(index);
+                        }}
+                        title="Close file"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button className="add-tab-btn" onClick={addFile} title="New File">
+                  +
+                </button>
               </div>
-            ) : (
-              <pre className="code-output">{jsCode}</pre>
-            )}
+              <div className="workspace-actions">
+                <span className="file-count">{files.length} file{files.length !== 1 ? 's' : ''}</span>
+              </div>
+            </div>
+            
+            <div className="code-area">
+              <div className="file-sidebar">
+                <div className="sidebar-header">
+                  <span>📁 Files</span>
+                </div>
+                <div className="file-tree">
+                  {files.map((file, index) => (
+                    <div 
+                      key={index} 
+                      className={`tree-item ${index === activeFileIndex ? 'active' : ''}`}
+                      onClick={() => setActiveFileIndex(index)}
+                    >
+                      <span className="tree-icon">📄</span>
+                      <span className="tree-name">{file.name}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="editor-main">
+                <textarea
+                  value={files[activeFileIndex]?.content || ''}
+                  onChange={(e) => handleInputChange(e.target.value)}
+                  placeholder="Enter your TypeScript code here..."
+                  className="code-editor"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="preview-section">
-            <h2>JavaScript Preview</h2>
-            <div className="preview-controls">
-              <button 
-                className={`preview-btn ${autoRun ? 'primary' : ''}`}
-                onClick={() => setAutoRun(!autoRun)}
-              >
-                {autoRun ? 'Auto Run: ON' : 'Auto Run: OFF'}
-              </button>
-              <button className="preview-btn" onClick={runCode}>
-                Run Code
-              </button>
-              <button className="preview-btn" onClick={clearPreview}>
-                Clear
-              </button>
+            <div className="preview-header">
+              <h2>Preview</h2>
             </div>
-            <iframe
-              ref={iframeRef}
-              className="preview-output"
-              sandbox="allow-scripts"
-              title="JavaScript Preview"
+            <PreviewEngine
+              modules={compiledModules}
             />
           </div>
         </div>
