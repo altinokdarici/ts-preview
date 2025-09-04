@@ -7,16 +7,27 @@ import { showLoading, hideLoading } from "./loading-overlay.ts";
 // Show loading initially
 showLoading();
 
+// Debounce timer for module execution
+let debounceTimer: number | null = null;
+
 const messageHandlers = {
   EXECUTE_MODULES: (data: { modules: Record<string, string> }) => {
-    // Show loading briefly during execution
-    showLoading();
+    // Show loading immediately on first call or when not already loading
+    if (!debounceTimer) {
+      showLoading();
+    }
 
-    // Small delay to show loading, then execute
-    setTimeout(() => {
+    // Clear any existing debounce timer
+    if (debounceTimer) {
+      clearTimeout(debounceTimer);
+    }
+
+    // Debounce the execution to prevent excessive calls
+    debounceTimer = setTimeout(() => {
       executeModules(data.modules);
       hideLoading();
-    }, 50);
+      debounceTimer = null;
+    }, 300); // 300ms debounce delay
   },
 };
 

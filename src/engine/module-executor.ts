@@ -58,6 +58,8 @@ export function executeModules(modules: Record<string, string>): void {
       react: "/static/react.js",
       "react-dom/client": "/static/react-dom/client.js",
       "react-dom": "/static/react-dom/client.js",
+      "@fluentui/react-components": "/static/@fluentui/react-components.js",
+      "@griffel/react": "/static/@griffel/react.js",
     };
     const moduleBlobs: Record<string, string> = {};
 

@@ -6,6 +6,8 @@ export default defineConfig({
       entry: {
         react: require.resolve('react'),
         'react-dom/client': require.resolve('react-dom/client'),
+        "@griffel/react": require.resolve('@griffel/react'),
+        "@fluentui/react-components": require.resolve('@fluentui/react-components')
       },
       formats: ['es'],
     },

@@ -297,6 +297,28 @@
   font-weight: 500;
 }
 
+.unsaved-indicator {
+  font-size: 12px;
+  color: #f59e0b;
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+.dirty-indicator {
+  color: #f59e0b;
+  font-weight: bold;
+  margin-left: 0.25rem;
+  font-size: 16px;
+}
+
+.file-tab.dirty .tab-name {
+  color: #d97706;
+}
+
+.tree-item.dirty .tree-name {
+  color: #d97706;
+}
+
 .code-area {
   display: flex;
   flex: 1;

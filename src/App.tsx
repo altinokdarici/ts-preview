@@ -5,7 +5,10 @@ import PreviewEngine from "./components/PreviewEngine";
 interface FileData {
   name: string;
   content: string;
+  isDirty: boolean;
+  savedContent: string;
 }
+
 
 const App: React.FC = () => {
   const [files, setFiles] = useState<FileData[]>([
@@ -13,44 +16,60 @@ const App: React.FC = () => {
       name: "index.tsx",
       content: `import React from 'react';
 import ReactDom from 'react-dom/client';
-import { UserCard, Counter } from './ui.js';
+import TodoList from './TodoList.js';
 
-console.log(ReactDom);
 const { createRoot } = ReactDom;
-interface User {
-  name: string;
-  age: number;
-  role: string;
-}
 
 const App: React.FC = () => {
-  const users: User[] = [
-    { name: 'Alice', age: 28, role: 'Designer' },
-    { name: 'Bob', age: 32, role: 'Developer' },
-    { name: 'Carol', age: 25, role: 'Manager' }
-  ];
-
   return (
     <div style={{
       fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       padding: '20px',
-      maxWidth: '600px',
-      margin: '0 auto',
-      lineHeight: '1.6'
+      minHeight: '100vh',
+      backgroundColor: '#f5f5f5'
     }}>
       <h1 style={{
         color: '#2563eb',
         textAlign: 'center',
         marginBottom: '30px'
       }}>
-        React TypeScript Demo
+        FluentUI Todo App
       </h1>
       
-      {users.map((user, index) => (
-        <UserCard key={index} user={user} />
-      ))}
+      <TodoList />
+    </div>
+  );
+};
+
+// Create root and render
+const container = document.createElement('div');
+document.body.appendChild(container);
+const root = createRoot(container);
+root.render(<App />);`,
+      isDirty: false,
+      savedContent: `import React from 'react';
+import ReactDom from 'react-dom/client';
+import TodoList from './TodoList.js';
+
+const { createRoot } = ReactDom;
+
+const App: React.FC = () => {
+  return (
+    <div style={{
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      padding: '20px',
+      minHeight: '100vh',
+      backgroundColor: '#f5f5f5'
+    }}>
+      <h1 style={{
+        color: '#2563eb',
+        textAlign: 'center',
+        marginBottom: '30px'
+      }}>
+        FluentUI Todo App
+      </h1>
       
-      <Counter />
+      <TodoList />
     </div>
   );
 };
@@ -62,132 +81,330 @@ const root = createRoot(container);
 root.render(<App />);`,
     },
     {
-      name: "ui.tsx",
+      name: "types.tsx",
+      content: `export interface TodoItem {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+export interface TodoListProps {}
+
+export default TodoItem;`,
+      isDirty: false,
+      savedContent: `export interface TodoItem {
+  id: string;
+  text: string;
+  completed: boolean;
+}
+
+export interface TodoListProps {}
+
+export default TodoItem;`,
+    },
+    {
+      name: "styles.tsx",
+      content: `import GriffelReact from '@griffel/react';
+import FluentComponents from '@fluentui/react-components';
+
+const { makeStyles } = GriffelReact;
+const { tokens } = FluentComponents;
+
+const useStyles = makeStyles({
+  container: {
+    maxWidth: '400px',
+    margin: '20px auto',
+    padding: tokens.spacingVerticalL,
+    backgroundColor: tokens.colorNeutralBackground1,
+    borderRadius: tokens.borderRadiusMedium,
+    boxShadow: tokens.shadow4,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalS,
+  },
+  inputRow: {
+    display: 'flex',
+    gap: tokens.spacingHorizontalS,
+  },
+  todoItem: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: tokens.spacingVerticalS,
+    borderBottom: \`1px solid \${tokens.colorNeutralStrokeAccessible}\`,
+  },
+  todoText: {
+    flexGrow: 1,
+    marginLeft: tokens.spacingHorizontalS,
+    wordBreak: 'break-word',
+  },
+  completedText: {
+    textDecoration: 'line-through',
+    color: tokens.colorNeutralForegroundDisabled,
+  },
+  button: {
+    minWidth: '80px',
+  },
+});
+
+export default useStyles;`,
+      isDirty: false,
+      savedContent: `import GriffelReact from '@griffel/react';
+import FluentComponents from '@fluentui/react-components';
+
+const { makeStyles } = GriffelReact;
+const { tokens } = FluentComponents;
+
+const useStyles = makeStyles({
+  container: {
+    maxWidth: '400px',
+    margin: '20px auto',
+    padding: tokens.spacingVerticalL,
+    backgroundColor: tokens.colorNeutralBackground1,
+    borderRadius: tokens.borderRadiusMedium,
+    boxShadow: tokens.shadow4,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: tokens.spacingVerticalS,
+  },
+  inputRow: {
+    display: 'flex',
+    gap: tokens.spacingHorizontalS,
+  },
+  todoItem: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: tokens.spacingVerticalS,
+    borderBottom: \`1px solid \${tokens.colorNeutralStrokeAccessible}\`,
+  },
+  todoText: {
+    flexGrow: 1,
+    marginLeft: tokens.spacingHorizontalS,
+    wordBreak: 'break-word',
+  },
+  completedText: {
+    textDecoration: 'line-through',
+    color: tokens.colorNeutralForegroundDisabled,
+  },
+  button: {
+    minWidth: '80px',
+  },
+});
+
+export default useStyles;`,
+    },
+    {
+      name: "TodoList.tsx",
       content: `import React from 'react';
+import FluentComponents from '@fluentui/react-components';
+import GriffelReact from '@griffel/react';
+import TodoItem from './types.js';
+import useStyles from './styles.js';
 
-interface User {
-  name: string;
-  age: number;
-  role: string;
-}
+const { FluentProvider, webLightTheme, Button, Input, Checkbox, tokens } = FluentComponents;
+const { mergeClasses } = GriffelReact;
 
-interface UserCardProps {
-  user: User;
-}
+const TodoList: React.FC = React.memo(() => {
+  const styles = useStyles();
+  const [todos, setTodos] = React.useState<TodoItem[]>([]);
+  const [inputValue, setInputValue] = React.useState<string>('');
+  const [error, setError] = React.useState<string>('');
 
-export const UserCard: React.FC<UserCardProps> = ({ user }) => {
-  const [isHovered, setIsHovered] = React.useState(false);
+  const handleAddTodo = () => {
+    const trimmed = inputValue.trim();
+    if (!trimmed) {
+      setError('Please enter a task.');
+      return;
+    }
+    setTodos(prev => [
+      ...prev,
+      { id: crypto.randomUUID(), text: trimmed, completed: false },
+    ]);
+    setInputValue('');
+    setError('');
+  };
 
-  const cardStyle: React.CSSProperties = {
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: 'white',
-    padding: '20px',
-    borderRadius: '12px',
-    marginBottom: '15px',
-    boxShadow: isHovered 
-      ? '0 8px 24px rgba(0, 0, 0, 0.2)' 
-      : '0 4px 12px rgba(0, 0, 0, 0.15)',
-    transform: isHovered ? 'translateY(-5px)' : 'translateY(0)',
-    transition: 'all 0.2s ease',
-    cursor: 'pointer'
+  const handleToggleCompleted = (id: string) => {
+    setTodos(prev =>
+      prev.map(todo =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo,
+      ),
+    );
+  };
+
+  const handleRemoveTodo = (id: string) => {
+    setTodos(prev => prev.filter(todo => todo.id !== id));
+  };
+
+  const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleAddTodo();
+    }
   };
 
   return (
-    <div
-      style={cardStyle}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <h3 style={{ margin: '0 0 10px 0', fontSize: '1.4em' }}>
-        {user.name}
-      </h3>
-      <p style={{ margin: '5px 0', opacity: 0.9 }}>
-        Age: {user.age}
-      </p>
-      <p style={{ margin: '5px 0', opacity: 0.9 }}>
-        Role: {user.role}
-      </p>
-    </div>
+    <FluentProvider theme={webLightTheme}>
+      <main className={styles.container} aria-label="Todo List">
+        <div className={styles.inputRow}>
+          <Input
+            aria-label="New task"
+            placeholder="Add new task"
+            value={inputValue}
+            onChange={e => setInputValue(e.target.value)}
+            onKeyDown={handleInputKeyDown}
+            autoComplete="off"
+          />
+          <Button
+            className={styles.button}
+            onClick={handleAddTodo}
+            aria-label="Add task"
+          >
+            Add
+          </Button>
+        </div>
+        {error && (
+          <div role="alert" style={{ color: tokens.colorPaletteRedForeground1 }}>
+            {error}
+          </div>
+        )}
+        <ul aria-live="polite" style={{ paddingLeft: 0, listStyle: 'none' }}>
+          {todos.map(todo => (
+            <li key={todo.id} className={styles.todoItem}>
+              <Checkbox
+                checked={todo.completed}
+                onChange={() => handleToggleCompleted(todo.id)}
+                aria-label={\`Mark task "\${todo.text}" as completed\`}
+              />
+              <span
+                className={mergeClasses(
+                  styles.todoText,
+                  todo.completed && styles.completedText,
+                )}
+              >
+                {todo.text}
+              </span>
+              <Button
+                appearance="subtle"
+                onClick={() => handleRemoveTodo(todo.id)}
+                aria-label={\`Remove task "\${todo.text}"\`}
+              >
+                Remove
+              </Button>
+            </li>
+          ))}
+        </ul>
+      </main>
+    </FluentProvider>
   );
-};
+});
 
-export const Counter: React.FC = () => {
-  const [count, setCount] = React.useState(0);
-  const [buttonPressed, setButtonPressed] = React.useState<string | null>(null);
+export default TodoList;`,
+      isDirty: false,
+      savedContent: `import React from 'react';
+import FluentComponents from '@fluentui/react-components';
+import GriffelReact from '@griffel/react';
+import TodoItem from './types.js';
+import useStyles from './styles.js';
 
-  const containerStyle: React.CSSProperties = {
-    background: '#f8fafc',
-    border: '2px solid #e2e8f0',
-    borderRadius: '12px',
-    padding: '20px',
-    textAlign: 'center',
-    marginTop: '30px'
+const { FluentProvider, webLightTheme, Button, Input, Checkbox, tokens } = FluentComponents;
+const { mergeClasses } = GriffelReact;
+
+const TodoList: React.FC = React.memo(() => {
+  const styles = useStyles();
+  const [todos, setTodos] = React.useState<TodoItem[]>([]);
+  const [inputValue, setInputValue] = React.useState<string>('');
+  const [error, setError] = React.useState<string>('');
+
+  const handleAddTodo = () => {
+    const trimmed = inputValue.trim();
+    if (!trimmed) {
+      setError('Please enter a task.');
+      return;
+    }
+    setTodos(prev => [
+      ...prev,
+      { id: crypto.randomUUID(), text: trimmed, completed: false },
+    ]);
+    setInputValue('');
+    setError('');
   };
 
-  const buttonStyle = (color: string, pressed: boolean): React.CSSProperties => ({
-    background: color,
-    color: 'white',
-    border: 'none',
-    padding: '10px 20px',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '1em',
-    margin: '0 5px',
-    transform: pressed ? 'scale(0.95)' : 'scale(1)',
-    transition: 'transform 0.1s ease'
-  });
+  const handleToggleCompleted = (id: string) => {
+    setTodos(prev =>
+      prev.map(todo =>
+        todo.id === id ? { ...todo, completed: !todo.completed } : todo,
+      ),
+    );
+  };
 
-  const handleButtonPress = (buttonType: string, action: () => void) => {
-    setButtonPressed(buttonType);
-    action();
-    setTimeout(() => setButtonPressed(null), 100);
+  const handleRemoveTodo = (id: string) => {
+    setTodos(prev => prev.filter(todo => todo.id !== id));
+  };
+
+  const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleAddTodo();
+    }
   };
 
   return (
-    <div style={containerStyle}>
-      <h3 style={{ margin: '0 0 15px 0', color: '#1e293b' }}>
-        Interactive Counter
-      </h3>
-      
-      <div style={{
-        fontSize: '2.5em',
-        fontWeight: 'bold',
-        color: '#3b82f6',
-        margin: '15px 0'
-      }}>
-        {count}
-      </div>
-      
-      <div style={{
-        display: 'flex',
-        gap: '10px',
-        justifyContent: 'center',
-        marginTop: '15px'
-      }}>
-        <button
-          style={buttonStyle('#ef4444', buttonPressed === 'decrement')}
-          onClick={() => handleButtonPress('decrement', () => setCount(count - 1))}
-        >
-          -1
-        </button>
-        
-        <button
-          style={buttonStyle('#6b7280', buttonPressed === 'reset')}
-          onClick={() => handleButtonPress('reset', () => setCount(0))}
-        >
-          Reset
-        </button>
-        
-        <button
-          style={buttonStyle('#10b981', buttonPressed === 'increment')}
-          onClick={() => handleButtonPress('increment', () => setCount(count + 1))}
-        >
-          +1
-        </button>
-      </div>
-    </div>
+    <FluentProvider theme={webLightTheme}>
+      <main className={styles.container} aria-label="Todo List">
+        <div className={styles.inputRow}>
+          <Input
+            aria-label="New task"
+            placeholder="Add new task"
+            value={inputValue}
+            onChange={e => setInputValue(e.target.value)}
+            onKeyDown={handleInputKeyDown}
+            autoComplete="off"
+          />
+          <Button
+            className={styles.button}
+            onClick={handleAddTodo}
+            aria-label="Add task"
+          >
+            Add
+          </Button>
+        </div>
+        {error && (
+          <div role="alert" style={{ color: tokens.colorPaletteRedForeground1 }}>
+            {error}
+          </div>
+        )}
+        <ul aria-live="polite" style={{ paddingLeft: 0, listStyle: 'none' }}>
+          {todos.map(todo => (
+            <li key={todo.id} className={styles.todoItem}>
+              <Checkbox
+                checked={todo.completed}
+                onChange={() => handleToggleCompleted(todo.id)}
+                aria-label={\`Mark task "\${todo.text}" as completed\`}
+              />
+              <span
+                className={mergeClasses(
+                  styles.todoText,
+                  todo.completed && styles.completedText,
+                )}
+              >
+                {todo.text}
+              </span>
+              <Button
+                appearance="subtle"
+                onClick={() => handleRemoveTodo(todo.id)}
+                aria-label={\`Remove task "\${todo.text}"\`}
+              >
+                Remove
+              </Button>
+            </li>
+          ))}
+        </ul>
+      </main>
+    </FluentProvider>
   );
-};`,
+});
+
+export default TodoList;`,
     },
   ]);
   const [activeFileIndex, setActiveFileIndex] = useState(0);
@@ -202,6 +419,29 @@ export const Counter: React.FC = () => {
     processFiles(files);
   }, []);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Cmd+S (Mac) or Ctrl+S (Windows/Linux)
+      if ((event.metaKey || event.ctrlKey) && event.key === "s") {
+        event.preventDefault();
+        saveFile(); // Save current active file
+      }
+      // Cmd+Shift+S or Ctrl+Shift+S for save all
+      if (
+        (event.metaKey || event.ctrlKey) &&
+        event.shiftKey &&
+        event.key === "S"
+      ) {
+        event.preventDefault();
+        saveAllFiles();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [files, activeFileIndex]);
+
   const processFiles = (files: FileData[]) => {
     // Use JavaScript files directly
     const modules: Record<string, string> = {};
@@ -215,16 +455,78 @@ export const Counter: React.FC = () => {
 
   const handleInputChange = (value: string) => {
     const updatedFiles = files.map((file, index) =>
-      index === activeFileIndex ? { ...file, content: value } : file
+      index === activeFileIndex
+        ? {
+            ...file,
+            content: value,
+            isDirty: value !== file.savedContent,
+          }
+        : file
     );
     setFiles(updatedFiles);
+    // No auto-execution - only mark as dirty
+  };
+
+  const saveFile = (fileIndex?: number) => {
+    const indexToSave = fileIndex !== undefined ? fileIndex : activeFileIndex;
+    const fileToSave = files[indexToSave];
+
+    if (!fileToSave || !fileToSave.isDirty) {
+      return; // Nothing to save
+    }
+
+    const updatedFiles = files.map((file, index) =>
+      index === indexToSave
+        ? {
+            ...file,
+            savedContent: file.content,
+            isDirty: false,
+          }
+        : file
+    );
+
+    setFiles(updatedFiles);
+
+    // Process files after save to trigger execution
+    processFiles(updatedFiles);
+  };
+
+  const saveAllFiles = () => {
+    const hasDirtyFiles = files.some((file) => file.isDirty);
+
+    if (!hasDirtyFiles) {
+      return; // Nothing to save
+    }
+
+    const updatedFiles = files.map((file) =>
+      file.isDirty
+        ? {
+            ...file,
+            savedContent: file.content,
+            isDirty: false,
+          }
+        : file
+    );
+
+    setFiles(updatedFiles);
+
+    // Process files after save to trigger execution
     processFiles(updatedFiles);
   };
 
   const addFile = () => {
     const fileName = prompt("Enter file name (e.g., foo.ts):");
     if (fileName && !files.find((f) => f.name === fileName)) {
-      const newFiles = [...files, { name: fileName, content: "// New file\n" }];
+      const newFileContent = "// New file\n";
+      const newFiles = [
+        ...files,
+        {
+          name: fileName,
+          content: newFileContent,
+          isDirty: false,
+          savedContent: newFileContent,
+        },
+      ];
       setFiles(newFiles);
       setActiveFileIndex(newFiles.length - 1);
     }
@@ -258,11 +560,16 @@ export const Counter: React.FC = () => {
                     key={index}
                     className={`file-tab ${
                       index === activeFileIndex ? "active" : ""
-                    }`}
+                    } ${file.isDirty ? "dirty" : ""}`}
                     onClick={() => setActiveFileIndex(index)}
                   >
                     <span className="tab-icon">📄</span>
-                    <span className="tab-name">{file.name}</span>
+                    <span className="tab-name">
+                      {file.name}
+                      {file.isDirty && (
+                        <span className="dirty-indicator">•</span>
+                      )}
+                    </span>
                     {files.length > 1 && (
                       <button
                         className="tab-close"
@@ -289,6 +596,11 @@ export const Counter: React.FC = () => {
                 <span className="file-count">
                   {files.length} file{files.length !== 1 ? "s" : ""}
                 </span>
+                {files.some((file) => file.isDirty) && (
+                  <span className="unsaved-indicator">
+                    {files.filter((file) => file.isDirty).length} unsaved
+                  </span>
+                )}
               </div>
             </div>
 
@@ -303,11 +615,16 @@ export const Counter: React.FC = () => {
                       key={index}
                       className={`tree-item ${
                         index === activeFileIndex ? "active" : ""
-                      }`}
+                      } ${file.isDirty ? "dirty" : ""}`}
                       onClick={() => setActiveFileIndex(index)}
                     >
                       <span className="tree-icon">📄</span>
-                      <span className="tree-name">{file.name}</span>
+                      <span className="tree-name">
+                        {file.name}
+                        {file.isDirty && (
+                          <span className="dirty-indicator">•</span>
+                        )}
+                      </span>
                     </div>
                   ))}
                 </div>

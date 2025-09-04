@@ -14,7 +14,7 @@
     "react-dom": "^18.2.0",
     "typescript": "^5.0.0",
     "@fluentui/react-components": "^9.54.0",
-    "lodash": "latest"
+    "@griffel/react": "^1.0.0"
   },
   "devDependencies": {
     "@types/react": "^18.2.0",
