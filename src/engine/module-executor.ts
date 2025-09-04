@@ -44,13 +44,14 @@ export function executeModules(modules: Record<string, string>): void {
     }
 
     // Step 2: Create blob URLs and virtual import map with app:/ prefix
+    const basePath = new URL(window.location.href).pathname.split('/').slice(0, -2).join('/');
     const importMap: Record<string, string> = {
-      react: "/static/react.named.js",
-      "react-dom/client": "/static/react-dom/client.named.js",
-      "react-dom": "/static/react-dom/client.named.js",
+      react: `${basePath}/static/react.named.js`,
+      "react-dom/client": `${basePath}/static/react-dom/client.named.js`,
+      "react-dom": `${basePath}/static/react-dom/client.named.js`,
       "@fluentui/react-components":
-        "/static/@fluentui/react-components.named.js",
-      "@griffel/react": "/static/@griffel/react.named.js",
+        `${basePath}/static/@fluentui/react-components.named.js`,
+      "@griffel/react": `${basePath}/static/@griffel/react.named.js`,
     };
     const moduleBlobs: Record<string, string> = {};
 
