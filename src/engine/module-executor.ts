@@ -44,7 +44,7 @@ export function executeModules(modules: Record<string, string>): void {
     }
 
     // Step 2: Create blob URLs and virtual import map with app:/ prefix
-    const basePath = new URL(window.location.href).pathname.split('/').slice(0, -2).join('/');
+    const basePath = new URL(window.location.href).pathname.split('/').slice(0, -3).join('/');
     const importMap: Record<string, string> = {
       react: `${basePath}/static/react.named.js`,
       "react-dom/client": `${basePath}/static/react-dom/client.named.js`,
