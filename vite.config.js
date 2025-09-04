@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  base: '/previewer/',
   server: {
     host: '0.0.0.0',
     port: 5173,
@@ -28,7 +29,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: './index.html',
-        sw: './src/engine/sw.ts',
         engine: './src/engine/index.html'
       }
     }
