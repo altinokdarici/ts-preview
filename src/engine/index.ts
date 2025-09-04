@@ -27,7 +27,7 @@ const messageHandlers = {
       executeModules(data.modules);
       hideLoading();
       debounceTimer = null;
-    }, 300); // 300ms debounce delay
+    }, 100); // 100ms debounce delay
   },
 };
 

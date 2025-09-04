@@ -15,10 +15,8 @@ const App: React.FC = () => {
     {
       name: "index.tsx",
       content: `import React from 'react';
-import ReactDom from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import TodoList from './TodoList.js';
-
-const { createRoot } = ReactDom;
 
 const App: React.FC = () => {
   return (
@@ -48,10 +46,8 @@ const root = createRoot(container);
 root.render(<App />);`,
       isDirty: false,
       savedContent: `import React from 'react';
-import ReactDom from 'react-dom/client';
+import { createRoot } from 'react-dom/client';
 import TodoList from './TodoList.js';
-
-const { createRoot } = ReactDom;
 
 const App: React.FC = () => {
   return (
@@ -81,34 +77,9 @@ const root = createRoot(container);
 root.render(<App />);`,
     },
     {
-      name: "types.tsx",
-      content: `export interface TodoItem {
-  id: string;
-  text: string;
-  completed: boolean;
-}
-
-export interface TodoListProps {}
-
-export default TodoItem;`,
-      isDirty: false,
-      savedContent: `export interface TodoItem {
-  id: string;
-  text: string;
-  completed: boolean;
-}
-
-export interface TodoListProps {}
-
-export default TodoItem;`,
-    },
-    {
       name: "styles.tsx",
-      content: `import GriffelReact from '@griffel/react';
-import FluentComponents from '@fluentui/react-components';
-
-const { makeStyles } = GriffelReact;
-const { tokens } = FluentComponents;
+      content: `import { makeStyles } from '@griffel/react';
+import { tokens } from '@fluentui/react-components';
 
 const useStyles = makeStyles({
   container: {
@@ -149,11 +120,8 @@ const useStyles = makeStyles({
 
 export default useStyles;`,
       isDirty: false,
-      savedContent: `import GriffelReact from '@griffel/react';
-import FluentComponents from '@fluentui/react-components';
-
-const { makeStyles } = GriffelReact;
-const { tokens } = FluentComponents;
+      savedContent: `import { makeStyles } from '@griffel/react';
+import { tokens } from '@fluentui/react-components';
 
 const useStyles = makeStyles({
   container: {
@@ -197,13 +165,10 @@ export default useStyles;`,
     {
       name: "TodoList.tsx",
       content: `import React from 'react';
-import FluentComponents from '@fluentui/react-components';
-import GriffelReact from '@griffel/react';
+import { FluentProvider, webLightTheme, Button, Input, Checkbox, tokens } from '@fluentui/react-components';
+import { mergeClasses } from '@griffel/react';
 import TodoItem from './types.js';
 import useStyles from './styles.js';
-
-const { FluentProvider, webLightTheme, Button, Input, Checkbox, tokens } = FluentComponents;
-const { mergeClasses } = GriffelReact;
 
 const TodoList: React.FC = React.memo(() => {
   const styles = useStyles();

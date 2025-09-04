@@ -1,6 +1,14 @@
 import { defineConfig } from 'vite'
+import postbundleNamedShims from './plugins/postbundle-named-shims.js';
 
 export default defineConfig({
+  plugins: [
+    postbundleNamedShims({
+      specifiers: ['react', 'react-dom/client', "@griffel/react", "@fluentui/react-components"],
+      shimSuffix: '.named.js',
+    }),
+  ],
+  publicDir: false, 
   build: {
     lib: {
       entry: {
@@ -14,7 +22,8 @@ export default defineConfig({
     outDir: 'public/static',
     emptyOutDir: false,
     rollupOptions: {
-      output: { entryFileNames: '[name].js' }
+      output: { entryFileNames: '[name].js' },
+      external: []
     },
   },
   define: {
