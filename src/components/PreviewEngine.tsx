@@ -1,7 +1,13 @@
 import React, { useRef, useEffect } from 'react';
 
+interface ExternalModule {
+  name: string;
+  url: string;
+}
+
 interface PreviewEngineProps {
   modules: Record<string, string> | null;
+  externalModules?: ExternalModule[];
   onReady?: () => void;
 }
 
@@ -67,7 +73,7 @@ const PreviewEngine: React.FC<PreviewEngineProps> = ({
       className="preview-output"
       sandbox="allow-scripts"
       title="JavaScript Preview"
-      src="/src/engine/index.html"
+      src="http://preview.localhost:5173/src/engine/index.html"
     />
   );
 };

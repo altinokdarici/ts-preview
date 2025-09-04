@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import './App.css'
-import PreviewEngine from './components/PreviewEngine'
+import React, { useState, useEffect } from "react";
+import "./App.css";
+import PreviewEngine from "./components/PreviewEngine";
 
 interface FileData {
   name: string;
@@ -10,9 +10,8 @@ interface FileData {
 const App: React.FC = () => {
   const [files, setFiles] = useState<FileData[]>([
     {
-      name: 'index.js',
+      name: "index.ts",
       content: `import { createUserCard, createCounter } from './ui.js';
-
 // Create main container
 const app = document.createElement('div');
 app.style.cssText = \`
@@ -25,7 +24,7 @@ app.style.cssText = \`
 
 // Add title
 const title = document.createElement('h1');
-title.textContent = 'JavaScript UI Demo';
+title.textContent = 'Typescript UI Demo';
 title.style.cssText = \`
   color: #2563eb;
   text-align: center;
@@ -50,10 +49,10 @@ const counter = createCounter();
 app.appendChild(counter);
 
 // Add to page
-document.body.appendChild(app);`
+document.body.appendChild(app);`,
     },
     {
-      name: 'ui.js',
+      name: "ui.ts",
       content: `export function createUserCard(user) {
   const card = document.createElement('div');
   card.style.cssText = \`
@@ -173,45 +172,48 @@ export function createCounter() {
   container.appendChild(buttonContainer);
   
   return container;
-}`
-    }
+}`,
+    },
   ]);
   const [activeFileIndex, setActiveFileIndex] = useState(0);
-  const [compiledModules, setCompiledModules] = useState<Record<string, string> | null>(null)
-  const [error, setError] = useState('')
+  const [compiledModules, setCompiledModules] = useState<Record<
+    string,
+    string
+  > | null>(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     // Process initial files
-    processFiles(files)
-  }, [])
+    processFiles(files);
+  }, []);
 
   const processFiles = (files: FileData[]) => {
     // Use JavaScript files directly
     const modules: Record<string, string> = {};
-    files.forEach(file => {
+    files.forEach((file) => {
       modules[file.name] = file.content;
     });
-    
+
     setCompiledModules(modules);
-    setError('');
-  }
+    setError("");
+  };
 
   const handleInputChange = (value: string) => {
-    const updatedFiles = files.map((file, index) => 
+    const updatedFiles = files.map((file, index) =>
       index === activeFileIndex ? { ...file, content: value } : file
     );
     setFiles(updatedFiles);
     processFiles(updatedFiles);
-  }
+  };
 
   const addFile = () => {
-    const fileName = prompt('Enter file name (e.g., foo.ts):');
-    if (fileName && !files.find(f => f.name === fileName)) {
-      const newFiles = [...files, { name: fileName, content: '// New file\n' }];
+    const fileName = prompt("Enter file name (e.g., foo.ts):");
+    if (fileName && !files.find((f) => f.name === fileName)) {
+      const newFiles = [...files, { name: fileName, content: "// New file\n" }];
       setFiles(newFiles);
       setActiveFileIndex(newFiles.length - 1);
     }
-  }
+  };
 
   const removeFile = (index: number) => {
     if (files.length === 1) return; // Keep at least one file
@@ -220,31 +222,34 @@ export function createCounter() {
     if (activeFileIndex >= newFiles.length) {
       setActiveFileIndex(newFiles.length - 1);
     }
-  }
-
+  };
 
   return (
     <div className="app">
       <header className="header">
-        <h1>JavaScript Playground</h1>
-        <p>Write JavaScript code with ES modules and see the execution results</p>
+        <h1>Typescript Playground</h1>
+        <p>
+          Write Typescript code with ES modules and see the execution results
+        </p>
       </header>
-      
+
       <main className="main">
         <div className="editor-container">
           <div className="code-workspace">
             <div className="workspace-header">
               <div className="file-tabs">
                 {files.map((file, index) => (
-                  <div 
-                    key={index} 
-                    className={`file-tab ${index === activeFileIndex ? 'active' : ''}`}
+                  <div
+                    key={index}
+                    className={`file-tab ${
+                      index === activeFileIndex ? "active" : ""
+                    }`}
                     onClick={() => setActiveFileIndex(index)}
                   >
                     <span className="tab-icon">📄</span>
                     <span className="tab-name">{file.name}</span>
                     {files.length > 1 && (
-                      <button 
+                      <button
                         className="tab-close"
                         onClick={(e) => {
                           e.stopPropagation();
@@ -257,15 +262,21 @@ export function createCounter() {
                     )}
                   </div>
                 ))}
-                <button className="add-tab-btn" onClick={addFile} title="New File">
+                <button
+                  className="add-tab-btn"
+                  onClick={addFile}
+                  title="New File"
+                >
                   +
                 </button>
               </div>
               <div className="workspace-actions">
-                <span className="file-count">{files.length} file{files.length !== 1 ? 's' : ''}</span>
+                <span className="file-count">
+                  {files.length} file{files.length !== 1 ? "s" : ""}
+                </span>
               </div>
             </div>
-            
+
             <div className="code-area">
               <div className="file-sidebar">
                 <div className="sidebar-header">
@@ -273,9 +284,11 @@ export function createCounter() {
                 </div>
                 <div className="file-tree">
                   {files.map((file, index) => (
-                    <div 
-                      key={index} 
-                      className={`tree-item ${index === activeFileIndex ? 'active' : ''}`}
+                    <div
+                      key={index}
+                      className={`tree-item ${
+                        index === activeFileIndex ? "active" : ""
+                      }`}
                       onClick={() => setActiveFileIndex(index)}
                     >
                       <span className="tree-icon">📄</span>
@@ -284,10 +297,10 @@ export function createCounter() {
                   ))}
                 </div>
               </div>
-              
+
               <div className="editor-main">
                 <textarea
-                  value={files[activeFileIndex]?.content || ''}
+                  value={files[activeFileIndex]?.content || ""}
                   onChange={(e) => handleInputChange(e.target.value)}
                   placeholder="Enter your TypeScript code here..."
                   className="code-editor"
@@ -300,14 +313,12 @@ export function createCounter() {
             <div className="preview-header">
               <h2>Preview</h2>
             </div>
-            <PreviewEngine
-              modules={compiledModules}
-            />
+            <PreviewEngine modules={compiledModules} />
           </div>
         </div>
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;
