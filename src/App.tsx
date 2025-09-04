@@ -10,169 +10,184 @@ interface FileData {
 const App: React.FC = () => {
   const [files, setFiles] = useState<FileData[]>([
     {
-      name: "index.ts",
-      content: `import { createUserCard, createCounter } from './ui.js';
-// Create main container
-const app = document.createElement('div');
-app.style.cssText = \`
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  padding: 20px;
-  max-width: 600px;
-  margin: 0 auto;
-  line-height: 1.6;
-\`;
+      name: "index.tsx",
+      content: `import React from 'react';
+import ReactDom from 'react-dom/client';
+import { UserCard, Counter } from './ui.js';
 
-// Add title
-const title = document.createElement('h1');
-title.textContent = 'Typescript UI Demo';
-title.style.cssText = \`
-  color: #2563eb;
-  text-align: center;
-  margin-bottom: 30px;
-\`;
-app.appendChild(title);
-
-// Create user cards
-const users = [
-  { name: 'Alice', age: 28, role: 'Designer' },
-  { name: 'Bob', age: 32, role: 'Developer' },
-  { name: 'Carol', age: 25, role: 'Manager' }
-];
-
-users.forEach(user => {
-  const card = createUserCard(user);
-  app.appendChild(card);
-});
-
-// Add counter component
-const counter = createCounter();
-app.appendChild(counter);
-
-// Add to page
-document.body.appendChild(app);`,
-    },
-    {
-      name: "ui.ts",
-      content: `export function createUserCard(user) {
-  const card = document.createElement('div');
-  card.style.cssText = \`
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px;
-    border-radius: 12px;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transform: translateY(0);
-    transition: transform 0.2s ease;
-  \`;
-  
-  card.innerHTML = \`
-    <h3 style="margin: 0 0 10px 0; font-size: 1.4em;">\${user.name}</h3>
-    <p style="margin: 5px 0; opacity: 0.9;">Age: \${user.age}</p>
-    <p style="margin: 5px 0; opacity: 0.9;">Role: \${user.role}</p>
-  \`;
-  
-  // Add hover effect
-  card.addEventListener('mouseenter', () => {
-    card.style.transform = 'translateY(-5px)';
-    card.style.boxShadow = '0 8px 24px rgba(0, 0, 0, 0.2)';
-  });
-  
-  card.addEventListener('mouseleave', () => {
-    card.style.transform = 'translateY(0)';
-    card.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
-  });
-  
-  return card;
+console.log(ReactDom);
+const { createRoot } = ReactDom;
+interface User {
+  name: string;
+  age: number;
+  role: string;
 }
 
-export function createCounter() {
-  const container = document.createElement('div');
-  container.style.cssText = \`
-    background: #f8fafc;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    margin-top: 30px;
-  \`;
-  
-  const title = document.createElement('h3');
-  title.textContent = 'Interactive Counter';
-  title.style.cssText = \`
-    margin: 0 0 15px 0;
-    color: #1e293b;
-  \`;
-  
-  const display = document.createElement('div');
-  display.textContent = '0';
-  display.style.cssText = \`
-    font-size: 2.5em;
-    font-weight: bold;
-    color: #3b82f6;
-    margin: 15px 0;
-  \`;
-  
-  const buttonContainer = document.createElement('div');
-  buttonContainer.style.cssText = \`
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 15px;
-  \`;
-  
-  let count = 0;
-  
-  const createButton = (text, color, onClick) => {
-    const button = document.createElement('button');
-    button.textContent = text;
-    button.style.cssText = \`
-      background: \${color};
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1em;
-      transition: transform 0.1s ease;
-    \`;
-    
-    button.addEventListener('click', onClick);
-    button.addEventListener('mousedown', () => {
-      button.style.transform = 'scale(0.95)';
-    });
-    button.addEventListener('mouseup', () => {
-      button.style.transform = 'scale(1)';
-    });
-    
-    return button;
+const App: React.FC = () => {
+  const users: User[] = [
+    { name: 'Alice', age: 28, role: 'Designer' },
+    { name: 'Bob', age: 32, role: 'Developer' },
+    { name: 'Carol', age: 25, role: 'Manager' }
+  ];
+
+  return (
+    <div style={{
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      padding: '20px',
+      maxWidth: '600px',
+      margin: '0 auto',
+      lineHeight: '1.6'
+    }}>
+      <h1 style={{
+        color: '#2563eb',
+        textAlign: 'center',
+        marginBottom: '30px'
+      }}>
+        React TypeScript Demo
+      </h1>
+      
+      {users.map((user, index) => (
+        <UserCard key={index} user={user} />
+      ))}
+      
+      <Counter />
+    </div>
+  );
+};
+
+// Create root and render
+const container = document.createElement('div');
+document.body.appendChild(container);
+const root = createRoot(container);
+root.render(<App />);`,
+    },
+    {
+      name: "ui.tsx",
+      content: `import React from 'react';
+
+interface User {
+  name: string;
+  age: number;
+  role: string;
+}
+
+interface UserCardProps {
+  user: User;
+}
+
+export const UserCard: React.FC<UserCardProps> = ({ user }) => {
+  const [isHovered, setIsHovered] = React.useState(false);
+
+  const cardStyle: React.CSSProperties = {
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    padding: '20px',
+    borderRadius: '12px',
+    marginBottom: '15px',
+    boxShadow: isHovered 
+      ? '0 8px 24px rgba(0, 0, 0, 0.2)' 
+      : '0 4px 12px rgba(0, 0, 0, 0.15)',
+    transform: isHovered ? 'translateY(-5px)' : 'translateY(0)',
+    transition: 'all 0.2s ease',
+    cursor: 'pointer'
   };
-  
-  const incrementBtn = createButton('+1', '#10b981', () => {
-    count++;
-    display.textContent = count;
+
+  return (
+    <div
+      style={cardStyle}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <h3 style={{ margin: '0 0 10px 0', fontSize: '1.4em' }}>
+        {user.name}
+      </h3>
+      <p style={{ margin: '5px 0', opacity: 0.9 }}>
+        Age: {user.age}
+      </p>
+      <p style={{ margin: '5px 0', opacity: 0.9 }}>
+        Role: {user.role}
+      </p>
+    </div>
+  );
+};
+
+export const Counter: React.FC = () => {
+  const [count, setCount] = React.useState(0);
+  const [buttonPressed, setButtonPressed] = React.useState<string | null>(null);
+
+  const containerStyle: React.CSSProperties = {
+    background: '#f8fafc',
+    border: '2px solid #e2e8f0',
+    borderRadius: '12px',
+    padding: '20px',
+    textAlign: 'center',
+    marginTop: '30px'
+  };
+
+  const buttonStyle = (color: string, pressed: boolean): React.CSSProperties => ({
+    background: color,
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    fontSize: '1em',
+    margin: '0 5px',
+    transform: pressed ? 'scale(0.95)' : 'scale(1)',
+    transition: 'transform 0.1s ease'
   });
-  
-  const decrementBtn = createButton('-1', '#ef4444', () => {
-    count--;
-    display.textContent = count;
-  });
-  
-  const resetBtn = createButton('Reset', '#6b7280', () => {
-    count = 0;
-    display.textContent = count;
-  });
-  
-  buttonContainer.appendChild(decrementBtn);
-  buttonContainer.appendChild(resetBtn);
-  buttonContainer.appendChild(incrementBtn);
-  
-  container.appendChild(title);
-  container.appendChild(display);
-  container.appendChild(buttonContainer);
-  
-  return container;
-}`,
+
+  const handleButtonPress = (buttonType: string, action: () => void) => {
+    setButtonPressed(buttonType);
+    action();
+    setTimeout(() => setButtonPressed(null), 100);
+  };
+
+  return (
+    <div style={containerStyle}>
+      <h3 style={{ margin: '0 0 15px 0', color: '#1e293b' }}>
+        Interactive Counter
+      </h3>
+      
+      <div style={{
+        fontSize: '2.5em',
+        fontWeight: 'bold',
+        color: '#3b82f6',
+        margin: '15px 0'
+      }}>
+        {count}
+      </div>
+      
+      <div style={{
+        display: 'flex',
+        gap: '10px',
+        justifyContent: 'center',
+        marginTop: '15px'
+      }}>
+        <button
+          style={buttonStyle('#ef4444', buttonPressed === 'decrement')}
+          onClick={() => handleButtonPress('decrement', () => setCount(count - 1))}
+        >
+          -1
+        </button>
+        
+        <button
+          style={buttonStyle('#6b7280', buttonPressed === 'reset')}
+          onClick={() => handleButtonPress('reset', () => setCount(0))}
+        >
+          Reset
+        </button>
+        
+        <button
+          style={buttonStyle('#10b981', buttonPressed === 'increment')}
+          onClick={() => handleButtonPress('increment', () => setCount(count + 1))}
+        >
+          +1
+        </button>
+      </div>
+    </div>
+  );
+};`,
     },
   ]);
   const [activeFileIndex, setActiveFileIndex] = useState(0);

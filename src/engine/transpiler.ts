@@ -8,6 +8,9 @@ export function transpileTypeScript(fileName: string, source: string): string {
     // Don't transform import statements - keep .js extensions for import map resolution
     console.log('[Transpiler] Source (no transformation):', source.substring(0, 200) + '...');
 
+    // Determine if this is a JSX/TSX file
+    const isJsxFile = fileName.endsWith('.jsx') || fileName.endsWith('.tsx');
+    
     // Transpile TypeScript to JavaScript
     const jsCode = ts.transpile(source, {
       target: ts.ScriptTarget.ES2020,
@@ -15,6 +18,9 @@ export function transpileTypeScript(fileName: string, source: string): string {
       strict: true,
       allowSyntheticDefaultImports: true,
       esModuleInterop: true,
+      jsx: isJsxFile ? ts.JsxEmit.React : ts.JsxEmit.None,
+      jsxFactory: 'React.createElement',
+      jsxFragmentFactory: 'React.Fragment'
     });
 
     console.log('[Transpiler] Transpiled JS:', jsCode.substring(0, 200) + '...');

@@ -25,7 +25,6 @@ export default defineConfig({
     }
   },
   build: {
-    lib: { entry: 'node_modules/react/index.js', formats: ['es'], fileName: () => 'react.js' },
     rollupOptions: {
       input: {
         main: './index.html',

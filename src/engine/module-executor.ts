@@ -33,10 +33,10 @@ export function executeModules(modules: Record<string, string>): void {
       let transpiledContent: string;
       let jsFileName: string;
 
-      // Transpile TypeScript files, keep JS files as-is
-      if (fileName.endsWith(".ts")) {
+      // Transpile TypeScript/TSX files, keep JS files as-is
+      if (fileName.endsWith(".ts") || fileName.endsWith(".tsx")) {
         transpiledContent = transpileTypeScript(fileName, source);
-        jsFileName = fileName.replace(/\.ts$/, ".js");
+        jsFileName = fileName.replace(/\.tsx?$/, ".js");
       } else {
         transpiledContent = source;
         jsFileName = fileName;
@@ -54,7 +54,11 @@ export function executeModules(modules: Record<string, string>): void {
     }
 
     // Step 2: Create blob URLs and virtual import map with app:/ prefix
-    const importMap: Record<string, string> = {};
+    const importMap: Record<string, string> = {
+      react: "/static/react.js",
+      "react-dom/client": "/static/react-dom/client.js",
+      "react-dom": "/static/react-dom/client.js",
+    };
     const moduleBlobs: Record<string, string> = {};
 
     for (const [jsFileName, transpiledContent] of Object.entries(

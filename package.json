@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "predev":"npm run build:vendor",
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && npm run build:vendor",
+    "build:vendor": "vite build --config vite.vendor.config.js",
     "preview": "vite preview"
   },
   "dependencies": {
