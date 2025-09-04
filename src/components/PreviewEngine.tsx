@@ -73,7 +73,8 @@ const PreviewEngine: React.FC<PreviewEngineProps> = ({
       className="preview-output"
       sandbox="allow-scripts"
       title="JavaScript Preview"
-      src="http://preview.localhost:5173/src/engine/index.html"
+      src="./src/engine/index.html"
+      // src="http://preview.localhost:5173/src/engine/index.html"
     />
   );
 };
